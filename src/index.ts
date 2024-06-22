@@ -1,18 +1,16 @@
-/* eslint-disable import/first */
-import * as dotenv from 'dotenv';
+import { fetchStockList } from './fetchStockList';
+import { identifyTopPerformers } from './identifyTopPerformers';
+import { saveData } from './saveData';
+import path from 'path';
 
-dotenv.config();
-
-import { server } from './app';
-import log from './logger';
-
-function startServer() {
-  const PORT = process.env.PORT as string || 8080;
-  server.listen(PORT, () => {
-    log.info(`Server running 🤖🚀 at http://localhost:${PORT}/`);
-  });
+async function main() {
+    const marketCap = 'smallcap'; // Example market cap
+    const stocks = await fetchStockList(marketCap);
+    const topPerformers = await identifyTopPerformers(stocks);
+    const today = new Date().toISOString().split('T')[0];
+    const directory = path.join(__dirname, '..', 'data', today);
+    await saveData(topPerformers, directory);
+    console.log('Top 10 Pre-Market Stocks:', topPerformers);
 }
 
-setImmediate(startServer);
-
-export default server;
+main().catch(console.error);
